@@ -1,12 +1,8 @@
-#!/bin/bash
-
-# Fungsi untuk menampilkan cara penggunaan
 usage() {
     echo "Usage: $0 --domain <domain>"
     exit 1
 }
 
-# Parsing argumen untuk mendapatkan domain
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --domain) DOMAIN="$2"; shift ;;
@@ -15,17 +11,14 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# Validasi apakah domain diisi
 if [ -z "$DOMAIN" ]; then
     echo "Error: Domain is not specified."
     usage
 fi
 
-# Tentukan path untuk file wp-config.php dan .htaccess
 WP_CONFIG_PATH="/var/www/$DOMAIN/htdocs/wp-config.php"
 HTACCESS_PATH="/var/www/$DOMAIN/htdocs/.htaccess"
 
-# Periksa apakah situs EasyEngine ada untuk domain tersebut
 echo "Checking if EasyEngine site exists for $DOMAIN..."
 if ee site info $DOMAIN > /dev/null 2>&1; then
     echo "EasyEngine site exists. Proceeding with configuration..."
@@ -34,7 +27,6 @@ else
     exit 1
 fi
 
-# Tambahkan konfigurasi Multisite ke wp-config.php
 echo "Adding Multisite configuration to wp-config.php..."
 if grep -q "define('WP_ALLOW_MULTISITE', true);" $WP_CONFIG_PATH; then
     echo "Multisite configuration already present in wp-config.php. Skipping..."
@@ -51,7 +43,6 @@ EOL
     echo "Multisite configuration added to wp-config.php."
 fi
 
-# Tambahkan aturan rewrite ke .htaccess
 echo "Adding rewrite rules to .htaccess..."
 if grep -q "RewriteEngine On" $HTACCESS_PATH; then
     echo "Rewrite rules already present in .htaccess. Skipping..."
@@ -61,7 +52,6 @@ RewriteEngine On
 RewriteBase /
 RewriteRule ^index\.php$ - [L]
 
-# add a trailing slash to /wp-admin
 RewriteRule ^wp-admin$ wp-admin/ [R=301,L]
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
